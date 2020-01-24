@@ -1,0 +1,17 @@
+﻿<Window x:Class="WindowsExcelApp.Views.FindMissingTranslatedRowsInFile"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WindowsExcelApp.Views"
+        mc:Ignorable="d"
+        Title="FindMissingTranslatedRowsInFile" Height="450" Width="800">
+    <Grid>
+        <TextBox Text="پیدا کردن ردیف هایی که در فایل ترجمه نشدن" TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Top" TextAlignment="Center" FontWeight="Bold" Margin="0,22,0,0"/>
+        <Button Name="OrgBtn" Content="انتخاب فایل" Click="Org_File_Open" HorizontalAlignment="Left" Margin="595,88,0,0" VerticalAlignment="Top" Height="42" Width="117" Cursor="Hand"/>
+        <Button x:Name="Cancel" Click="Cancel_Btn" Content="پشیمون شدم" HorizontalAlignment="Left" Margin="595,336,0,0" VerticalAlignment="Top" Height="46" Width="117" Cursor="UpArrow" IsCancel="True"/>
+        <TextBox x:Name="OpTextBox" HorizontalAlignment="Left" Margin="87,88,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="409" Height="294"/>
+        <TextBlock HorizontalAlignment="Left" Margin="87,67,0,0" Text="Final Result" TextWrapping="Wrap" VerticalAlignment="Top"/>
+
+    </Grid>
+</Window>

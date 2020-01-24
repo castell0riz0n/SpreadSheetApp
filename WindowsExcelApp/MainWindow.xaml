@@ -1,0 +1,17 @@
+﻿<Window x:Class="WindowsExcelApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WindowsExcelApp"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.Background>
+            <ImageBrush ImageSource="http://api.myrestapi.ir/common/images/whale.png" TileMode="None" Stretch="Fill"/>
+        </Grid.Background>
+        <Button Content="Merge Org File With Sus" Click="Org_To_Sus_Btn_Click" HorizontalAlignment="Left" Margin="10,200,0,0" VerticalAlignment="Top" Height="59" Width="160" Cursor="Hand"/>
+        <Button Content="Merge Sus File With Org" Click="Sus_To_Org_Btn_Click" HorizontalAlignment="Left" Margin="10,264,0,0" VerticalAlignment="Top" Height="59" Width="160" Cursor="Hand"/>
+        <Button Content="Find Untranslated Rows" Click="Find_Missing_Tr_Btn_Click" HorizontalAlignment="Left" Margin="10,328,0,0" VerticalAlignment="Top" Height="59" Width="160" Cursor="Hand"/>
+    </Grid>
+</Window>

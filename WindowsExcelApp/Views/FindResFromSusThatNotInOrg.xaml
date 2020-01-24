@@ -1,0 +1,24 @@
+﻿<Window x:Class="WindowsExcelApp.Views.FindResFromSusThatNotInOrg"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WindowsExcelApp.Views"
+        mc:Ignorable="d"
+        Title="FindResFromSusThatNotInOrg" Height="450" Width="800">
+    <Grid>
+        <Grid>
+            <TextBox Text="پیدا کردن ردیف هایی که در فایل آبدیت شده هستند و در فایل اصلی نیستن" TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Top" TextAlignment="Center" FontWeight="Bold" Margin="0,22,0,0"/>
+            <Button Name="OrgBtn" Content="انتخاب فایل اصلی" Click="Org_File_Open" HorizontalAlignment="Left" Margin="593,95,0,0" VerticalAlignment="Top" Height="42" Width="117" Cursor="Hand"/>
+            <Button Name="SusBtn" Content="انتخاب فایل تغییر کرده" Click="Sus_File_Open" HorizontalAlignment="Left" Margin="593,178,0,0" VerticalAlignment="Top" Height="42" Width="117" Cursor="Hand"/>
+            <TextBox Name="OrgText" HorizontalAlignment="Left" Margin="85,95,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="409" Height="42"/>
+            <TextBox Name="SusText" HorizontalAlignment="Left" Margin="85,178,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="409" Height="42"/>
+            <Button Name="StartOp" Click="Start_Op" Content="شروع" HorizontalAlignment="Left" Margin="593,261,0,0" VerticalAlignment="Top" Height="46" Width="117" Cursor="Hand"/>
+            <TextBox x:Name="OpTextBox" HorizontalAlignment="Left" Margin="85,261,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="409" Height="133"/>
+            <TextBlock HorizontalAlignment="Left" Margin="85,74,0,0" Text="Org File Result" TextWrapping="Wrap" VerticalAlignment="Top"/>
+            <TextBlock HorizontalAlignment="Left" Margin="85,157,0,0" Text="Sus File Result" TextWrapping="Wrap" VerticalAlignment="Top"/>
+            <TextBlock HorizontalAlignment="Left" Margin="85,240,0,0" Text="Final Result" TextWrapping="Wrap" VerticalAlignment="Top"/>
+            <Button x:Name="Cancel" Click="Cancel_Btn" Content="پشیمون شدم" HorizontalAlignment="Left" Margin="593,348,0,0" VerticalAlignment="Top" Height="46" Width="117" Cursor="UpArrow"/>
+        </Grid>
+    </Grid>
+</Window>
