@@ -1,14 +1,13 @@
-﻿using System;
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Data;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using ClosedXML.Excel;
-using ExcelApp.Classes;
+﻿using ExcelApp.Classes;
 using ExcelApp.Utilities;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Threading.Tasks;
+using static ExcelApp.Helpers.Helpers;
+using static ExcelApp.Utilities.Utilities;
 
 namespace ExcelApp
 {
@@ -16,7 +15,8 @@ namespace ExcelApp
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.ResetColor();
+            Console.WriteLine("Hello Parnaz(KOPOLI) ! Hope you doing Great as usual");
             await Menu();
         }
 
@@ -26,19 +26,21 @@ namespace ExcelApp
             {
                 switch (SelectMenu())
                 {
-                    case 1:
-                        await StartOperation();
+                    case "1":
+                        await FindResFromOrgThatNotInSus();
                         await Menu();
                         break;
-                    case 2:
-                        await FindRowsNotInOtherFiles();
+                    case "2":
+                        await FindResFromSusThatNotInOrg();
                         await Menu();
                         break;
-                    case 3:
+                    case "3":
                         // await Parto.MapProperies();
                         await Menu();
                         break;
                 }
+
+                await Menu();
             }
             catch (Exception ex)
             {
@@ -48,96 +50,23 @@ namespace ExcelApp
 
         }
 
-        public static int SelectMenu()
+        public static string SelectMenu()
         {
             try
             {
-                Console.WriteLine("Start Map and Merge (1): ");
-                Console.WriteLine("Check For Diff and Add to Other (2) : ");
-                Console.Write("Please Type an option number To start : ");
-                return Int32.Parse(Console.ReadLine() ?? throw new InvalidOperationException("Please just enter one the available options number"));
+                Console.WriteLine("(1) Find rows from ORG file that not in Sus file : ");
+                Console.WriteLine("(2) Find rows from Sus file that not in Org file : ");
+                return GetInput("Please Type an option number To start");
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
                 Console.WriteLine("press any key to see menu . . .");
                 Console.ReadLine();
-                return 0;
+                Console.Clear();
+                return "0";
             }
 
-        }
-
-
-        private static List<string> FindFiles()
-        {
-            try
-            {
-                var filesPath = Directory.GetFiles(@"c:\excels", "*.json", SearchOption.AllDirectories);
-
-                return filesPath.ToList();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                Console.WriteLine("cannot find files in given directory");
-                return new List<string>();
-            }
-        }
-
-        private static async Task<ResourcesBaseDto> ReadFile(string fileAddress)
-        {
-            try
-            {
-                var data = new ResourcesBaseDto();
-                using (StreamReader reader = new StreamReader(fileAddress))
-                {
-                    var json = await reader.ReadToEndAsync();
-                    data = json.ToObjectFromJson<ResourcesBaseDto>();
-                }
-
-                if (data?.Sheet1.Count == 0)
-                {
-                    Console.WriteLine("cannot deserialize json");
-                    await Program.Menu();
-                }
-
-                Console.WriteLine($"{data.Sheet1.Count} Resource Name Found");
-                await Task.Delay(1000);
-                return data;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return new ResourcesBaseDto();
-            }
-        }
-
-        private static async Task<List<ResourcesDto>> ReadFileByAddress(string fileAddress)
-        {
-            try
-            {
-                var data = new List<ResourcesDto>();
-                using (StreamReader reader = new StreamReader(fileAddress))
-                {
-                    var json = await reader.ReadToEndAsync();
-                    data = json.ToObjectFromJson<List<ResourcesDto>>();
-                }
-
-                if (data?.Count == 0)
-                {
-                    Console.WriteLine("cannot deserialize json");
-                    await Program.Menu();
-                }
-
-                Console.WriteLine($"{data.Count} Resource Name Found");
-                await Task.Delay(1000);
-                return data;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                return new List<ResourcesDto>();
-            }
         }
 
         private static async Task StartOperation()
@@ -154,7 +83,7 @@ namespace ExcelApp
                 foreach (var file in files)
                 {
                     var fileName = file.Split('\\', StringSplitOptions.RemoveEmptyEntries);
-                    var currentFileData = await ReadFile(file);
+                    var currentFileData = await ReadJsonFile(file);
                     if (currentFileData.Sheet1.Count == 0)
                     {
                         Console.WriteLine("No Data returned from ReadFile Method");
@@ -172,7 +101,7 @@ namespace ExcelApp
 
                     DataTable dt = (DataTable)JsonConvert.DeserializeObject(addIsNotInList.ToJson(), (typeof(DataTable)));
 
-                    await ConvertJsonToExcel(dt, $"MergedData-{new Random().Next(10, 100)}");
+                    await SaveAsExcel(dt, $"MergedData");
 
                     Console.Read();
                 }
@@ -204,7 +133,7 @@ namespace ExcelApp
                     return;
                 }
 
-                if (Utilities.Utilities.WordIsInPersianOrArabic(rowData.Value))
+                if (WordIsInPersianOrArabic(rowData.Value))
                 {
                     if (findedInSheet1 == null)
                     {
@@ -217,7 +146,7 @@ namespace ExcelApp
                         UpdatedResourceList.Add(rowData);
                         return;
                     }
-                    if (Utilities.Utilities.WordIsInPersianOrArabic(findedInSheet1.Value))
+                    if (WordIsInPersianOrArabic(findedInSheet1.Value))
                     {
                         UpdatedResourceList.Add(rowData);
                         return;
@@ -260,26 +189,10 @@ namespace ExcelApp
 
         }
 
-        private static async Task<bool> FindMissingTranslated()
-        {
-            return false;
-        }
-
-
-        private static async Task ConvertJsonToExcel(DataTable jsonDt, string fileName)
-        {
-            using (var workbook = new XLWorkbook())
-            {
-                var worksheet = workbook.Worksheets.Add(jsonDt ,"Sample Sheet");
-                workbook.SaveAs($"C:\\excels\\{fileName}.xlsx");
-            }
-
-        }
-
         private static async Task FindRowsNotInOtherFiles()
         {
-            var originalFile = await ReadFileByAddress(@"c:\excels\originalFile.json");
-            var comparedFile = await ReadFileByAddress(@"c:\excels\comparedFile.json");
+            var originalFile = await ReadJsonFileByName("originalFile");
+            var comparedFile = await ReadJsonFileByName("comparedFile");
 
             var orgData = originalFile;
             var compData = comparedFile;
@@ -308,14 +221,259 @@ namespace ExcelApp
             compData = compData.OrderBy(a => a.Name).ToList();
             DataTable dt = (DataTable)JsonConvert.DeserializeObject(compData.ToJson(), (typeof(DataTable)));
             string fileName = $"UpdatedExcel-{new Random().Next(1000, 5000)}";
-            await ConvertJsonToExcel(dt, fileName);
+            await SaveAsExcel(dt, fileName);
 
             Console.WriteLine($"File Generated Successfully : {fileName}");
         }
 
-        private static async Task MergeFilesTogether()
+        private static async Task FindResFromOrgThatNotInSus()
         {
-            string baseFile = @"";
+            try
+            {
+                //0. Variables and warnings area
+                var listOfResourcesFound = new List<ResourcesDto>();
+                var userReaction = "";
+
+                Console.WriteLine(@"Please put your files in C:\ResourceData\Excel\");
+                //1. Convert Org and Sus excels to json
+                var org = ConvertExcelToDataSet("org");
+                var sus = ConvertExcelToDataSet("sus");
+
+                //2. read Org and Sus json files 
+                //var org = await Helpers.Helpers.ReadJsonFileByName("org");
+                //var sus = await Helpers.Helpers.ReadJsonFileByName("sus");
+
+                //3. find all res that is in Org but not in Sus
+                foreach (var res in org)
+                {
+                    if (sus.FirstOrDefault(a => a.Name == res.Name) != null)
+                    {
+                        continue;
+                    }
+                    listOfResourcesFound.Add(res);
+                }
+
+                //4. print number of result
+                if (listOfResourcesFound.Count == 0)
+                {
+                    Console.WriteLine("Hayyaa!!! files are all up . No resources found to add to the Sus file :-D");
+                    await ReturnToMenu();
+                }
+
+                //5. ask merge with sus
+                Console.Write($"{listOfResourcesFound.Count} line of resources found that they are not in Sus file :-( \n What should we do? \n\t To Save in a separate file Press (s) \n\t To add missing lines and merge with Sus Press (u)");
+
+                userReaction = GetInput("(s/u)?");
+
+                //6. base on answer | if no just save res | if yes merge and then save the res
+                switch (userReaction.ToLower())
+                {
+                    case "s":
+                        var saveResult = await SaveAsExcel(
+                            ConvertJsonToDataTable(listOfResourcesFound.ToJson()),
+                            "MissingResourcesRow");
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Save Successfully as {saveResult}.xlsx");
+                        Console.ResetColor();
+                        OpenResultFolder();
+                        await ReturnToMenu();
+                        break;
+                    case "u":
+                        sus.AddRange(listOfResourcesFound);
+                        sus = sus.OrderBy(a => a.Name).ToList();
+                        var rows = await SaveAsExcel(
+                            ConvertJsonToDataTable(listOfResourcesFound.ToJson()),
+                            "MissingResourcesRow");
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Save Successfully as {rows}.xlsx");
+
+                        var newSusResult = await SaveAsExcel(
+                            ConvertJsonToDataTable(sus.ToJson()),
+                            "Updated-Sus");
+                        Console.ResetColor();
+                        OpenResultFolder();
+                        await ReturnToMenu();
+                        break;
+                }
+
+                Console.WriteLine("You Entered wrong answer");
+                await ReturnToMenu();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                await Menu();
+            }
+        }
+
+        private static async Task FindResFromSusThatNotInOrg()
+        {
+            try
+            {
+                //0. Variables and warnings area
+                var listOfResourcesFound = new List<ResourcesDto>();
+                var userReaction = "";
+
+                Console.WriteLine(@"Please put your files in C:\ResourceData\Excel\");
+                //1. Convert Org and Sus excels to Dataset
+                var org = ConvertExcelToDataSet("org");
+                var sus = ConvertExcelToDataSet("sus");
+
+                //2. read Org and Sus json files 
+                //var org = await Helpers.Helpers.ReadJsonFileByName("org");
+                //var sus = await Helpers.Helpers.ReadJsonFileByName("sus");
+
+                //3. find all res that is in Org but not in Sus
+                foreach (var res in sus)
+                {
+                    if (org.FirstOrDefault(a => a.Name == res.Name) != null)
+                    {
+                        continue;
+                    }
+                    listOfResourcesFound.Add(res);
+                }
+
+                //4. print number of result
+                if (listOfResourcesFound.Count == 0)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Hayyaa!!! files are all up . no differences found :-D");
+                    Console.ResetColor();
+                    await ReturnToMenu();
+                }
+
+                //5. ask merge with sus
+                Console.Write($"{listOfResourcesFound.Count} line of resources found that they are not in ORG file :-( \n What should we do? \n\t To Save in a separate file Press (s) \n\t To add missing lines and merge with Org Press (u)");
+
+                userReaction = GetInput("(s/u)?");
+
+                //6. base on answer | if no just save res | if yes merge and then save the res
+                switch (userReaction.ToLower())
+                {
+                    case "s":
+                        var saveResult = await SaveAsExcel(
+                            ConvertJsonToDataTable(listOfResourcesFound.ToJson()),
+                            "MissingResourcesRow");
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Successfully saved as {saveResult}.xlsx");
+                        Console.ResetColor();
+                        OpenResultFolder();
+                        await ReturnToMenu();
+                        break;
+                    case "u":
+                        org.AddRange(listOfResourcesFound);
+                        org = org.OrderBy(a => a.Name).ToList();
+
+                        var rows = await SaveAsExcel(
+                            ConvertJsonToDataTable(listOfResourcesFound.ToJson()),
+                            "MissingResourcesRow");
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Successfully saved as {rows}.xlsx");
+
+                        var newSusResult = await SaveAsExcel(
+                            ConvertJsonToDataTable(org.ToJson()),
+                            "Updated-Org");
+
+                        Console.WriteLine($"Successfully saved as {newSusResult}.xlsx");
+                        Console.ResetColor();
+                        OpenResultFolder();
+                        await ReturnToMenu();
+                        break;
+                }
+
+                Console.WriteLine("You Entered wrong answer. lets back to menu");
+                await ReturnToMenu();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                await ReturnToMenu();
+            }
+        }
+
+        private static async Task FindAndReplaceMissingTranslated()
+        {
+            //0. Variable Area
+            
+            int translated = 0;
+            int hasNoTranslation = 0;
+            var updatedList = new List<ResourcesDto>();
+            var hasNoTranslationList = new List<ResourcesDto>();
+
+            //1. get files
+            var org = ConvertExcelToDataSet("org");
+            var sus = ConvertExcelToDataSet("sus");
+
+            //2. check for missed translations
+
+            Parallel.ForEach(org, rowData =>
+            {
+                var findedInSus = sus.FirstOrDefault(a => a.Name == rowData.Name);
+
+                if (string.IsNullOrEmpty(rowData.Value))
+                {
+                    if (!string.IsNullOrEmpty(findedInSus?.Value))
+                    {
+                        rowData.Value = findedInSus.Value;
+                        translated = translated + 1;
+                    }
+                    updatedList.Add(rowData);
+                    return;
+                }
+
+                if (WordIsInPersianOrArabic(rowData.Value))
+                {
+                    if (findedInSus == null)
+                    {
+                        updatedList.Add(rowData);
+                        hasNoTranslationList.Add(rowData);
+
+                        hasNoTranslation = hasNoTranslation + 1;
+                        return;
+                    }
+
+                    if (string.IsNullOrEmpty(findedInSus.Value))
+                    {
+                        updatedList.Add(rowData);
+                        hasNoTranslationList.Add(rowData);
+                        hasNoTranslation = hasNoTranslation + 1;
+                        return;
+                    }
+                    if (WordIsInPersianOrArabic(findedInSus.Value))
+                    {
+                        updatedList.Add(rowData);
+                        hasNoTranslationList.Add(rowData);
+                        hasNoTranslation = hasNoTranslation + 1;
+                        return;
+                    }
+
+                    rowData.Value = findedInSus.Value;
+                    translated = translated + 1;
+                    updatedList.Add(rowData);
+                    return;
+                }
+                updatedList.Add(rowData);
+            });
+
+            if (translated>0)
+            {
+                Console.WriteLine($"{translated} of rows translated :-D");
+                var newSusResult = await SaveAsExcel(
+                    ConvertJsonToDataTable(updatedList.ToJson()),
+                    "Org-Translated-By-Sus");
+            }
+
+            if (hasNoTranslation > 0 & hasNoTranslationList.Count > 0)
+            {
+                Console.WriteLine($"Also we can not find any translation for about {hasNoTranslation} rows \n please see the generated excel files that they don't have any translation");
+
+                var newSusResult = await SaveAsExcel(
+                    ConvertJsonToDataTable(hasNoTranslationList.ToJson()),
+                    "No-Translation-Found");
+            }
+
+            await ReturnToMenu();
         }
     }
 }
